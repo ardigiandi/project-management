@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+// import { Label } from "@/components/ui/label";
 import z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod/src/zod.js";
@@ -17,6 +17,7 @@ import { useState } from "react";
 import Loading from "./Loading";
 import delay from "@/lib/delay";
 import { toast } from "sonner";
+import { Link } from "react-router";
 
 const formSchema = z.object({
   email: z.string().email().min(1, { message: "Email is required" }),
@@ -76,6 +77,7 @@ export function LoginForm({
                       {...field}
                       autoComplete="off"
                       autoFocus
+                      type="email"
                     />
                   </FormControl>
                   <FormMessage />
@@ -125,9 +127,9 @@ export function LoginForm({
       </div>
       <div className="text-center text-sm">
         Don&apos;t have an account?{" "}
-        <a href="#" className="underline underline-offset-4">
+        <Link to="/signup" className="underline underline-offset-4">
           Sign up
-        </a>
+        </Link>
       </div>
     </div>
   );
