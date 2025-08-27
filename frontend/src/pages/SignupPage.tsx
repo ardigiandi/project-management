@@ -9,29 +9,37 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import apiClient from "@/config/axios";
 import delay from "@/lib/delay";
 import { zodResolver } from "@hookform/resolvers/zod/src/zod.js";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { toast } from "sonner";
 import z from "zod";
 
-const formShcema = z.object({
+const formShcema = z
+  .object({
     name: z.string().min(1, { message: "Name is required" }),
     email: z.string().email().min(1, { message: "Email is required" }),
-    password: z.string().min(1, { message: "Password is required" }).regex(
+    password: z
+      .string()
+      .min(1, { message: "Password is required" })
+      .regex(
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
         "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character"
       ),
-    confirmPassword: z.string()
+    confirmPassword: z
+      .string()
       .min(1, { message: "Confirm Password is required" }),
-  }).refine((data) => data.password === data.confirmPassword, {
+  })
+  .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",
     path: ["confirmPassword"],
   });
 
 function SignupPage() {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState<boolean>(false);
 
   const form = useForm<z.infer<typeof formShcema>>({
@@ -48,13 +56,19 @@ function SignupPage() {
     setLoading(true);
     try {
       delay(500);
-      toast("Signup successful", {
+      const { data } = await apiClient.post("/auth/register", values);
+      console.log(data);
+      toast(data.message, {
         onAutoClose: () => {
           setLoading(false);
+          navigate("/");
         },
       });
-    } catch (error) {}
-    console.log(values);
+    } catch (error: any) {
+      toast(error.response.data.message, {
+        onAutoClose: () => setLoading(false)
+      });
+    }
   };
 
   return (
@@ -68,7 +82,10 @@ function SignupPage() {
         </div>
         <div className="mt-5">
           <Form {...form}>
-            <form className="space-y-4" onSubmit={form.handleSubmit(handleSignup)}>
+            <form
+              className="space-y-4"
+              onSubmit={form.handleSubmit(handleSignup)}
+            >
               <FormField
                 control={form.control}
                 name="name"
@@ -110,7 +127,7 @@ function SignupPage() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel>Password</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Password"
@@ -143,13 +160,14 @@ function SignupPage() {
               />
               <div>
                 <Button type="submit" disabled={loading} className="w-full">
-                  {loading ? <Loading /> : "Signup"}
+                  {loading && <Loading />}
+                  Signup
                 </Button>
               </div>
               <div className="mt-5 text-center">
                 <p className="text-sm text-muted-foreground">
                   Already have an account?{" "}
-                  <Link to="/login" className="text-primary">
+                  <Link to="/" className="text-primary">
                     Login
                   </Link>
                 </p>

@@ -18,6 +18,7 @@ import Loading from "./Loading";
 import delay from "@/lib/delay";
 import { toast } from "sonner";
 import { Link } from "react-router";
+import apiClient from "@/config/axios";
 
 const formSchema = z.object({
   email: z.string().email().min(1, { message: "Email is required" }),
@@ -42,15 +43,20 @@ export function LoginForm({
     setLoading(true);
     console.log(values);
     try {
-      await delay(1000);
+      await delay(500);
       // hit api login
-      toast("Login successful", {
+      const { data } = await apiClient.post("/auth/login", values);
+      toast(data.message, {
         onAutoClose: () => {
-          setLoading(false)
-        }
+          setLoading(false);
+          // redirect ke halaman dashboard
+        },
       });
-    } catch (error) {
+    } catch (error: any) {
       console.log(error);
+      toast(error?.response.data.message, {
+        onAutoClose: () => setLoading(false),
+      });
     }
   };
 
