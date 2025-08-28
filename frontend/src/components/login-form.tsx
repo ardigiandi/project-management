@@ -17,7 +17,7 @@ import { useState } from "react";
 import Loading from "./Loading";
 import delay from "@/lib/delay";
 import { toast } from "sonner";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import apiClient from "@/config/axios";
 
 const formSchema = z.object({
@@ -30,6 +30,7 @@ export function LoginForm({
   ...props
 }: React.ComponentProps<"form">) {
   const [loading, setLoading] = useState<boolean>(false);
+  const navigate = useNavigate()
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -45,11 +46,14 @@ export function LoginForm({
     try {
       await delay(500);
       // hit api login
+
       const { data } = await apiClient.post("/auth/login", values);
       toast(data.message, {
         onAutoClose: () => {
           setLoading(false);
           // redirect ke halaman dashboard
+          navigate('/dashboard')
+
         },
       });
     } catch (error: any) {
