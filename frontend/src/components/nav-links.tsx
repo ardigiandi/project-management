@@ -1,8 +1,6 @@
-"use client"
+"use client";
 
-import {
-  type LucideIcon,
-} from "lucide-react"
+import { type LucideIcon } from "lucide-react";
 
 import {
   SidebarGroup,
@@ -10,23 +8,25 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
-import { Link } from "react-router"
+} from "@/components/ui/sidebar";
+import { Link } from "react-router";
 
-export function NavProjects({
-  projects,
+export function NavLinks({
+  title,
+  links,
 }: {
-  projects: {
-    name: string
-    url: string
-    icon: LucideIcon
-  }[]
+  title: string;
+  links: {
+    name: string;
+    url: string;
+    icon: LucideIcon;
+  }[];
 }) {
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Projects</SidebarGroupLabel>
+      <SidebarGroupLabel>{title}</SidebarGroupLabel>
       <SidebarMenu>
-        {projects.map((item) => (
+        {links.map((item) => (
           <SidebarMenuItem key={item.name}>
             <SidebarMenuButton asChild>
               <Link to={item.url}>
@@ -36,8 +36,7 @@ export function NavProjects({
             </SidebarMenuButton>
           </SidebarMenuItem>
         ))}
-        
       </SidebarMenu>
     </SidebarGroup>
-  )
+  );
 }
