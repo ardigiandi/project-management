@@ -34,6 +34,7 @@ import apiClient from "@/config/axios";
 import { toast } from "sonner";
 import ReactSelect from "react-select";
 import delay from "@/lib/delay";
+import type { Project } from "@/types/type";
 
 interface TagsOption {
   label: string;
@@ -41,13 +42,14 @@ interface TagsOption {
 }
 
 const formSchema = z.object({
-    projectId: z.object().optional().nullable(),
+    projectId: z.string().optional().nullable(),
     title: z.string().min(1, { message: "Title is required" }),
     description: z.string().min(1, { message: "Description is required" }),
     priority: z.string().min(1, { message: "Priority is required" }),
     tags: z.array(z.string().min(1, { message: "Tags is required" })),
     dueDate: z.string().min(1, { message: "Due Date is required" }),
-  }).superRefine((data, ctx) => {
+  })
+  .superRefine((data, ctx) => {
     const today = new Date().toISOString().split("T")[0];
     if (data.dueDate < today) {
       ctx.addIssue({
@@ -58,7 +60,12 @@ const formSchema = z.object({
     }
   });
 
-const FormProject = () => {
+interface FormProjectProps {
+  project?: Project;
+  getProject: () => void
+}
+
+const FormProject = ({ project, getProject }: FormProjectProps) => {
   const [open, setOpen] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [tags, setTags] = useState<TagsOption[]>([]);
@@ -97,30 +104,34 @@ const FormProject = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      projectId: null,
-      title: "",
-      description: "",
-      priority: "",
-      tags: [],
-      dueDate: "",
+      projectId: project?._id || null,
+      title: project?.title || "",
+      description: project?.description || "",
+      priority: project?.priority || "low",
+      tags: project?.tags || [],
+      dueDate: project?.dueDate.slice(0, 10) || "",
     },
   });
 
+  const url = project ? `/projects/${project._id}/update` : '/projects'
+  const method = project ? "put" : "post"
+
   const handleForm = async (values: z.infer<typeof formSchema>) => {
     console.log(values);
-    setLoading(true)
+    setLoading(true);
     try {
-      await delay(500)
-      const {data} = await apiClient.post("/projects", values)
+      await delay(500);
+      const { data } = await apiClient[method](url, values);
       toast.success(data.message, {
         onAutoClose: () => {
-          setOpen(false)
-        }
-      })
-      setLoading(false)
+          setOpen(false);
+          getProject()
+        },
+      });
+      setLoading(false);
     } catch (error) {
-      console.log(error)
-      toast.error("Error creating project")
+      console.log(error);
+      toast.error("Error creating project");
     }
   };
 
@@ -131,7 +142,12 @@ const FormProject = () => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>Create Project</Button>
+        <Button
+          variant={"ghost"}
+          className={project ? "text-blue-800 hover:bg-white" : ""}
+        >
+          {project ? "Edit" : "Create Project"}
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -213,6 +229,9 @@ const FormProject = () => {
                             isMulti
                             isClearable
                             placeholder="Select tags"
+                            value={tags.filter((tag) =>
+                              field.value.includes(tag.value)
+                            )}
                             onChange={(value) => {
                               field.onChange(
                                 value

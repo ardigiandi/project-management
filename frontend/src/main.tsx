@@ -7,7 +7,7 @@ import SignupPage from "./pages/SignupPage.tsx";
 import AuthLayouts from "./pages/layouts/AuthLayouts.tsx";
 import DashboardPage from "./pages/DashboardPage.tsx";
 import PublicRoutes from "./routes/PublicRoutes.tsx";
-import ProjectPage from "./projects/ProjectPage.tsx";
+import ProjectPage from "./pages/projects/ProjectPage.tsx";
 
 const root = document.getElementById("root") as HTMLElement;
 
